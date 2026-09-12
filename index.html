@@ -3,7 +3,7 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Trình Tạo Lưới In Cắt A4 (4x3cm)</title>
+    <title>Trình Tạo Lưới In Cắt A4 (4x3cm) - 4 Dòng</title>
     <style>
       /* CSS cho giao diện trên màn hình */
       body {
@@ -63,7 +63,6 @@
         height: 297mm;
         background: white;
         box-shadow: 0 0 5px rgba(0, 0, 0, 0.2);
-        /* Lề trên/dưới: 13.5mm, Lề trái/phải: 5mm để khung (200x270mm) nằm gọn giữa trang */
         padding: 13.5mm 5mm;
         box-sizing: border-box;
         display: grid;
@@ -76,18 +75,25 @@
         border: 0.5px solid black;
         box-sizing: border-box;
         display: flex;
+        flex-direction: column;
         align-items: center;
         justify-content: center;
         text-align: center;
-        font-size: 12pt; /* Cỡ chữ cân đối cho ô 4x3 */
+        font-size: 12pt; /* Cỡ chữ 12pt để vừa vặn 4 dòng trong 3cm */
         font-family: "Times New Roman", serif;
         word-wrap: break-word;
-        padding: 2mm;
+        padding: 1mm;
         overflow: hidden;
-        line-height: 1.2;
+        line-height: 1.15; /* Khoảng cách dòng hẹp lại để tiết kiệm diện tích */
       }
 
-      /* Ẩn phần điều khiển khi bấm in */
+      /* Dùng chung 1 định dạng cho mọi dòng */
+      .hs-line {
+        margin-bottom: 1px;
+        font-weight: normal;
+        font-style: normal;
+      }
+
       @media print {
         body {
           background: none;
@@ -112,17 +118,16 @@
   </head>
   <body>
     <div class="controls">
-      <h2>Nhập Dữ Liệu (Lưới 4x3 cm)</h2>
+      <h2>Nhập Dữ Liệu (Học sinh - 4 Dòng)</h2>
       <p>
-        Mỗi dòng sẽ được điền vào 1 ô vuông. Mỗi trang chứa tối đa 45 ô (5 cột x
-        9 hàng).
+        Nhập thông tin theo cấu trúc: <b>Tên | Số đo | Trường lớp | Loại áo</b>.
+        Nhấn Enter để xuống dòng cho học sinh tiếp theo.
       </p>
       <textarea
         id="dataInput"
-        placeholder="Nhập dữ liệu vào đây...
-Dòng 1
-Dòng 2
-Dòng 3"
+        placeholder="Nguyễn Văn A | 24.24.24 | 12A1 | Cộc tay
+Trần Thị B | 15.15.15 | THPT Lê Quý Đôn | Dài tay
+Lê Văn C | 20.20.20 | Lớp 10A2 | Cộc"
       ></textarea>
       <div class="btn-group">
         <button class="btn-generate" onclick="generateGrid()">Tạo Lưới</button>
@@ -145,7 +150,7 @@ Dòng 3"
         const printZone = document.getElementById("printZone");
         printZone.innerHTML = "";
 
-        const cellsPerPage = 45; // 5 cột x 9 hàng
+        const cellsPerPage = 45;
         const totalPages = Math.ceil(dataList.length / cellsPerPage) || 1;
 
         for (let p = 0; p < totalPages; p++) {
@@ -158,7 +163,20 @@ Dòng 3"
             cell.className = "cell";
 
             if (dataIndex < dataList.length) {
-              cell.innerText = dataList[dataIndex];
+              // Tách 4 thông tin dựa vào dấu |
+              const parts = dataList[dataIndex].split("|").map((p) => p.trim());
+
+              let htmlContent = "";
+              if (parts[0])
+                htmlContent += `<div class="hs-line">${parts[0]}</div>`;
+              if (parts[1])
+                htmlContent += `<div class="hs-line">${parts[1]}</div>`;
+              if (parts[2])
+                htmlContent += `<div class="hs-line">${parts[2]}</div>`;
+              if (parts[3])
+                htmlContent += `<div class="hs-line">${parts[3]}</div>`; /* Dòng thứ 4 cho loại áo */
+
+              cell.innerHTML = htmlContent;
             }
 
             page.appendChild(cell);
